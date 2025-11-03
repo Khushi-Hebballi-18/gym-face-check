@@ -4,6 +4,7 @@ import { Scan, UserPlus, Loader2 } from "lucide-react";
 import FaceScanner from "@/components/FaceScanner";
 import MemberRegistration from "@/components/MemberRegistration";
 import MemberStatus from "@/components/MemberStatus";
+import { BulkUpload } from "@/components/BulkUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -115,7 +116,7 @@ const Index = () => {
         </div>
 
         <Tabs defaultValue="scan" className="space-y-8">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-secondary">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-secondary">
             <TabsTrigger value="scan" className="data-[state=active]:bg-primary">
               <Scan className="mr-2 h-4 w-4" />
               Scan Member
@@ -123,6 +124,10 @@ const Index = () => {
             <TabsTrigger value="register" className="data-[state=active]:bg-primary">
               <UserPlus className="mr-2 h-4 w-4" />
               Register
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="data-[state=active]:bg-primary">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Bulk Upload
             </TabsTrigger>
           </TabsList>
 
@@ -148,6 +153,12 @@ const Index = () => {
                   toast.success("You can now scan the member's face!");
                 }}
               />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="bulk">
+            <div className="max-w-4xl mx-auto">
+              <BulkUpload />
             </div>
           </TabsContent>
         </Tabs>
