@@ -188,7 +188,8 @@ export const BulkUpload = () => {
                           id={`phone-${index}`}
                           value={member.phone}
                           onChange={(e) => updateMember(index, "phone", e.target.value)}
-                          placeholder="+1234567890"
+                          placeholder="+91 98765 43210"
+                          pattern="(\+91)?[6-9]\d{9}"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-2">

@@ -105,7 +105,8 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="+1 234 567 8900"
+                placeholder="+91 98765 43210"
+                pattern="(\+91)?[6-9]\d{9}"
                 className="bg-secondary border-border"
               />
             </div>
