@@ -14,6 +14,7 @@ interface MemberData {
   name: string;
   phone: string;
   membershipMonths: number;
+  membershipDays: number;
 }
 
 export const BulkUpload = () => {
@@ -28,6 +29,7 @@ export const BulkUpload = () => {
       name: "",
       phone: "",
       membershipMonths: 1,
+      membershipDays: 0,
     }));
     setMembers([...members, ...newMembers]);
   };
@@ -93,6 +95,7 @@ export const BulkUpload = () => {
         // Calculate membership end date
         const membershipEndDate = new Date();
         membershipEndDate.setMonth(membershipEndDate.getMonth() + member.membershipMonths);
+        membershipEndDate.setDate(membershipEndDate.getDate() + member.membershipDays);
 
         // Insert member into database
         const { error: insertError } = await supabase.from("members").insert({
@@ -188,17 +191,31 @@ export const BulkUpload = () => {
                           placeholder="+1234567890"
                         />
                       </div>
-                      <div>
-                        <Label htmlFor={`months-${index}`}>Membership (Months)</Label>
-                        <Input
-                          id={`months-${index}`}
-                          type="number"
-                          min="1"
-                          value={member.membershipMonths}
-                          onChange={(e) =>
-                            updateMember(index, "membershipMonths", parseInt(e.target.value))
-                          }
-                        />
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <Label htmlFor={`months-${index}`}>Months</Label>
+                          <Input
+                            id={`months-${index}`}
+                            type="number"
+                            min="0"
+                            value={member.membershipMonths}
+                            onChange={(e) =>
+                              updateMember(index, "membershipMonths", parseInt(e.target.value) || 0)
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor={`days-${index}`}>Days</Label>
+                          <Input
+                            id={`days-${index}`}
+                            type="number"
+                            min="0"
+                            value={member.membershipDays}
+                            onChange={(e) =>
+                              updateMember(index, "membershipDays", parseInt(e.target.value) || 0)
+                            }
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -12,7 +12,8 @@ import { extractFaceEmbedding } from "@/lib/faceDetection";
 const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [membershipDays, setMembershipDays] = useState(30);
+  const [membershipMonths, setMembershipMonths] = useState(1);
+  const [membershipDays, setMembershipDays] = useState(0);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedCanvas, setCapturedCanvas] = useState<HTMLCanvasElement | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -39,6 +40,7 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
 
       // Calculate membership end date
       const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + membershipMonths);
       endDate.setDate(endDate.getDate() + membershipDays);
 
       // Insert member into database
@@ -57,7 +59,8 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
       // Reset form
       setName("");
       setPhone("");
-      setMembershipDays(30);
+      setMembershipMonths(1);
+      setMembershipDays(0);
       setCapturedImage(null);
       setCapturedCanvas(null);
 
@@ -107,16 +110,29 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
               />
             </div>
 
-            <div>
-              <Label htmlFor="days">Membership Duration (days)</Label>
-              <Input
-                id="days"
-                type="number"
-                value={membershipDays}
-                onChange={(e) => setMembershipDays(parseInt(e.target.value))}
-                min={1}
-                className="bg-secondary border-border"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="months">Membership Months</Label>
+                <Input
+                  id="months"
+                  type="number"
+                  value={membershipMonths}
+                  onChange={(e) => setMembershipMonths(parseInt(e.target.value) || 0)}
+                  min={0}
+                  className="bg-secondary border-border"
+                />
+              </div>
+              <div>
+                <Label htmlFor="days">Additional Days</Label>
+                <Input
+                  id="days"
+                  type="number"
+                  value={membershipDays}
+                  onChange={(e) => setMembershipDays(parseInt(e.target.value) || 0)}
+                  min={0}
+                  className="bg-secondary border-border"
+                />
+              </div>
             </div>
           </div>
 
