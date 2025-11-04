@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Scan, UserPlus, Loader2 } from "lucide-react";
+import { Scan, UserPlus, Loader2, LogOut } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import FaceScanner from "@/components/FaceScanner";
 import MemberRegistration from "@/components/MemberRegistration";
 import MemberStatus from "@/components/MemberStatus";
 import { BulkUpload } from "@/components/BulkUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   initializeFaceDetection,
   extractFaceEmbedding,
@@ -14,6 +16,7 @@ import {
 } from "@/lib/faceDetection";
 
 const Index = () => {
+  const { signOut } = useAuth();
   const [isInitializing, setIsInitializing] = useState(true);
   const [isScanning, setIsScanning] = useState(false);
   const [recognizedMember, setRecognizedMember] = useState<any>(null);
@@ -106,13 +109,19 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Gym Face Recognition
-          </h1>
-          <p className="text-muted-foreground text-lg">
-            Scan member faces to verify membership status
-          </p>
+        <div className="flex justify-between items-start mb-8">
+          <div className="text-center flex-1">
+            <h1 className="text-4xl md:text-5xl font-bold mb-3 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Gym Face Recognition
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Scan member faces to verify membership status
+            </p>
+          </div>
+          <Button variant="outline" onClick={signOut} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
 
         <Tabs defaultValue="scan" className="space-y-8">

@@ -8,6 +8,8 @@ import FaceScanner from "./FaceScanner";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { extractFaceEmbedding } from "@/lib/faceDetection";
+import { memberSchema } from "@/lib/validations";
+import { ZodError } from "zod";
 
 const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [name, setName] = useState("");
@@ -30,6 +32,21 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
     if (!name || !capturedCanvas) {
       toast.error("Please provide name and capture face image");
       return;
+    }
+
+    // Validate input
+    try {
+      memberSchema.parse({
+        name,
+        phone: phone || "",
+        membershipMonths,
+        membershipDays
+      });
+    } catch (error) {
+      if (error instanceof ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
     }
 
     setIsSubmitting(true);

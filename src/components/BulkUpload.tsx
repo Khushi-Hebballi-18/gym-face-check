@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { extractFaceEmbedding } from "@/lib/faceDetection";
 import { toast } from "sonner";
 import { Upload, X } from "lucide-react";
+import { memberSchema } from "@/lib/validations";
+import { ZodError } from "zod";
 
 interface MemberData {
   file: File;
@@ -51,10 +53,22 @@ export const BulkUpload = () => {
       return;
     }
 
-    const invalidMembers = members.filter((m) => !m.name);
-    if (invalidMembers.length > 0) {
-      toast.error("All members must have a name");
-      return;
+    // Validate all members before processing
+    for (let i = 0; i < members.length; i++) {
+      const member = members[i];
+      try {
+        memberSchema.parse({
+          name: member.name,
+          phone: member.phone || "",
+          membershipMonths: member.membershipMonths,
+          membershipDays: member.membershipDays
+        });
+      } catch (error) {
+        if (error instanceof ZodError) {
+          toast.error(`Member ${i + 1}: ${error.errors[0].message}`);
+          return;
+        }
+      }
     }
 
     setIsUploading(true);
