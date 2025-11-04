@@ -12,7 +12,6 @@ interface MemberData {
   file: File;
   preview: string;
   name: string;
-  email: string;
   phone: string;
   membershipMonths: number;
 }
@@ -27,7 +26,6 @@ export const BulkUpload = () => {
       file,
       preview: URL.createObjectURL(file),
       name: "",
-      email: "",
       phone: "",
       membershipMonths: 1,
     }));
@@ -99,7 +97,6 @@ export const BulkUpload = () => {
         // Insert member into database
         const { error: insertError } = await supabase.from("members").insert({
           name: member.name,
-          email: member.email || null,
           phone: member.phone || null,
           face_embedding: faceEmbedding,
           membership_end_date: membershipEndDate.toISOString(),
@@ -180,16 +177,6 @@ export const BulkUpload = () => {
                           value={member.name}
                           onChange={(e) => updateMember(index, "name", e.target.value)}
                           placeholder="John Doe"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={`email-${index}`}>Email</Label>
-                        <Input
-                          id={`email-${index}`}
-                          type="email"
-                          value={member.email}
-                          onChange={(e) => updateMember(index, "email", e.target.value)}
-                          placeholder="john@example.com"
                         />
                       </div>
                       <div>

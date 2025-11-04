@@ -5,7 +5,6 @@ import { Badge } from "./ui/badge";
 interface Member {
   id: string;
   name: string;
-  email: string | null;
   phone: string | null;
   membership_end_date: string;
   is_active: boolean;
@@ -71,16 +70,6 @@ const MemberStatus = ({ member, similarity }: MemberStatusProps) => {
               <p className="text-lg font-semibold">{member.name}</p>
             </div>
           </div>
-
-          {member.email && (
-            <div className="flex items-center gap-3">
-              <div className="h-5 w-5" />
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p>{member.email}</p>
-              </div>
-            </div>
-          )}
 
           {member.phone && (
             <div className="flex items-center gap-3">

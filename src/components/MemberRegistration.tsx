@@ -11,7 +11,6 @@ import { extractFaceEmbedding } from "@/lib/faceDetection";
 
 const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [membershipDays, setMembershipDays] = useState(30);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -45,7 +44,6 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
       // Insert member into database
       const { error } = await supabase.from("members").insert({
         name,
-        email: email || null,
         phone: phone || null,
         face_embedding: embedding,
         membership_end_date: endDate.toISOString(),
@@ -58,7 +56,6 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
       
       // Reset form
       setName("");
-      setEmail("");
       setPhone("");
       setMembershipDays(30);
       setCapturedImage(null);
@@ -95,18 +92,6 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="John Doe"
                 required
-                className="bg-secondary border-border"
-              />
-            </div>
-
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="john@example.com"
                 className="bg-secondary border-border"
               />
             </div>
