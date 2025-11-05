@@ -14,11 +14,34 @@ export type Database = {
   }
   public: {
     Tables: {
+      member_biometrics: {
+        Row: {
+          created_at: string | null
+          face_embedding: string
+          id: string
+          member_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          face_embedding: string
+          id?: string
+          member_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          face_embedding?: string
+          id?: string
+          member_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       members: {
         Row: {
           created_at: string
           email: string | null
-          face_embedding: string
           id: string
           is_active: boolean
           membership_end_date: string
@@ -30,7 +53,6 @@ export type Database = {
         Insert: {
           created_at?: string
           email?: string | null
-          face_embedding: string
           id?: string
           is_active?: boolean
           membership_end_date: string
@@ -42,7 +64,6 @@ export type Database = {
         Update: {
           created_at?: string
           email?: string | null
-          face_embedding?: string
           id?: string
           is_active?: boolean
           membership_end_date?: string

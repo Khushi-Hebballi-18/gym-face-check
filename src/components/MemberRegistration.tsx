@@ -4,12 +4,13 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import FaceScanner from "./FaceScanner";
+import FaceScannerWithValidation from "./FaceScannerWithValidation";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { extractFaceEmbedding } from "@/lib/faceDetection";
 import { memberSchema } from "@/lib/validations";
 import { ZodError } from "zod";
+import { validateFaceEmbedding } from "@/lib/imageValidation";
 
 const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [name, setName] = useState("");
@@ -55,21 +56,42 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
       // Extract face embedding
       const embedding = await extractFaceEmbedding(capturedCanvas);
 
+      // Validate embedding
+      const embeddingValidation = validateFaceEmbedding(embedding);
+      if (!embeddingValidation.isValid) {
+        toast.error(embeddingValidation.error || "Invalid face data");
+        setIsSubmitting(false);
+        return;
+      }
+
       // Calculate membership end date
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + membershipMonths);
       endDate.setDate(endDate.getDate() + membershipDays);
 
       // Insert member into database
-      const { error } = await supabase.from("members").insert({
-        name,
-        phone: phone || null,
-        face_embedding: embedding,
-        membership_end_date: endDate.toISOString(),
-        is_active: true,
-      });
+      const { data: memberData, error } = await supabase
+        .from("members")
+        .insert({
+          name,
+          phone: phone || null,
+          membership_end_date: endDate.toISOString(),
+          is_active: true,
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Insert biometric data separately
+      const { error: biometricError } = await supabase
+        .from("member_biometrics")
+        .insert({
+          member_id: memberData.id,
+          face_embedding: embedding,
+        });
+
+      if (biometricError) throw biometricError;
 
       toast.success("Member registered successfully!");
       
@@ -155,7 +177,7 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
 
           <div className="space-y-4">
             <Label>Capture Face *</Label>
-            <FaceScanner onCapture={handleCapture} />
+            <FaceScannerWithValidation onCapture={handleCapture} />
             
             {capturedImage && (
               <div className="mt-4">

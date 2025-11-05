@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Upload, X } from "lucide-react";
 import { memberSchema } from "@/lib/validations";
 import { ZodError } from "zod";
+import { validateImageFile, validateFaceDetection, validateFaceEmbedding } from "@/lib/imageValidation";
 
 interface MemberData {
   file: File;
@@ -23,17 +24,31 @@ export const BulkUpload = () => {
   const [members, setMembers] = useState<MemberData[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    const newMembers = files.map((file) => ({
-      file,
-      preview: URL.createObjectURL(file),
-      name: "",
-      phone: "",
-      membershipMonths: 1,
-      membershipDays: 0,
-    }));
-    setMembers([...members, ...newMembers]);
+    const validatedMembers: MemberData[] = [];
+
+    for (const file of files) {
+      const validation = await validateImageFile(file);
+      if (!validation.isValid) {
+        toast.error(`${file.name}: ${validation.error}`);
+        continue;
+      }
+
+      validatedMembers.push({
+        file,
+        preview: URL.createObjectURL(file),
+        name: "",
+        phone: "",
+        membershipMonths: 1,
+        membershipDays: 0,
+      });
+    }
+
+    if (validatedMembers.length > 0) {
+      setMembers([...members, ...validatedMembers]);
+      toast.success(`${validatedMembers.length} image(s) validated successfully`);
+    }
   };
 
   const updateMember = (index: number, field: keyof MemberData, value: any) => {
@@ -80,6 +95,13 @@ export const BulkUpload = () => {
         img.src = member.preview;
         await new Promise((resolve) => (img.onload = resolve));
 
+        // Validate face detection
+        const faceValidation = await validateFaceDetection(img);
+        if (!faceValidation.isValid) {
+          toast.error(`${member.name}: ${faceValidation.error}`);
+          continue;
+        }
+
         // Create canvas and draw image
         const canvas = document.createElement("canvas");
         canvas.width = img.width;
@@ -98,6 +120,13 @@ export const BulkUpload = () => {
           continue;
         }
 
+        // Validate embedding
+        const embeddingValidation = validateFaceEmbedding(faceEmbedding);
+        if (!embeddingValidation.isValid) {
+          toast.error(`${member.name}: ${embeddingValidation.error}`);
+          continue;
+        }
+
         // Upload photo to storage
         const fileName = `${Date.now()}_${member.file.name}`;
         const { error: uploadError } = await supabase.storage
@@ -112,14 +141,27 @@ export const BulkUpload = () => {
         membershipEndDate.setDate(membershipEndDate.getDate() + member.membershipDays);
 
         // Insert member into database
-        const { error: insertError } = await supabase.from("members").insert({
-          name: member.name,
-          phone: member.phone || null,
-          face_embedding: faceEmbedding,
-          membership_end_date: membershipEndDate.toISOString(),
-        });
+        const { data: memberData, error: insertError } = await supabase
+          .from("members")
+          .insert({
+            name: member.name,
+            phone: member.phone || null,
+            membership_end_date: membershipEndDate.toISOString(),
+          })
+          .select()
+          .single();
 
         if (insertError) throw insertError;
+
+        // Insert biometric data separately
+        const { error: biometricError } = await supabase
+          .from("member_biometrics")
+          .insert({
+            member_id: memberData.id,
+            face_embedding: faceEmbedding,
+          });
+
+        if (biometricError) throw biometricError;
 
         toast.success(`${member.name} registered successfully`);
       }

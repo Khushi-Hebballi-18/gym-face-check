@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scan, UserPlus, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import FaceScanner from "@/components/FaceScanner";
+import FaceScannerWithValidation from "@/components/FaceScannerWithValidation";
 import MemberRegistration from "@/components/MemberRegistration";
 import MemberStatus from "@/components/MemberStatus";
 import { BulkUpload } from "@/components/BulkUpload";
@@ -45,10 +45,15 @@ const Index = () => {
       // Extract embedding from captured face
       const capturedEmbedding = await extractFaceEmbedding(canvas);
 
-      // Get all members from database
+      // Get all members with their biometric data
       const { data: members, error } = await supabase
         .from("members")
-        .select("*");
+        .select(`
+          *,
+          member_biometrics (
+            face_embedding
+          )
+        `);
 
       if (error) throw error;
 
@@ -63,9 +68,18 @@ const Index = () => {
       let bestSimilarity = 0;
 
       for (const member of members) {
+        // Skip if member has no biometric data
+        const biometrics = Array.isArray(member.member_biometrics) 
+          ? member.member_biometrics 
+          : member.member_biometrics ? [member.member_biometrics] : [];
+        
+        if (biometrics.length === 0) {
+          continue;
+        }
+
         const similarity = compareFaceEmbeddings(
           capturedEmbedding,
-          member.face_embedding
+          biometrics[0].face_embedding
         );
 
         if (similarity > bestSimilarity) {
@@ -142,7 +156,7 @@ const Index = () => {
 
           <TabsContent value="scan" className="space-y-8">
             <div className="max-w-2xl mx-auto">
-              <FaceScanner onCapture={handleScan} isScanning={isScanning} />
+              <FaceScannerWithValidation onCapture={handleScan} isScanning={isScanning} />
             </div>
 
             {(recognizedMember || (isScanning === false && recognizedMember === null && matchSimilarity === undefined)) && (
