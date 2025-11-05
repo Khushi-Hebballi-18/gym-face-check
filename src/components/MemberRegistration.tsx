@@ -4,7 +4,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card";
-import FaceScannerWithValidation from "./FaceScannerWithValidation";
+import FaceScanner from "./FaceScanner";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { extractFaceEmbedding } from "@/lib/faceDetection";
@@ -177,7 +177,7 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
 
           <div className="space-y-4">
             <Label>Capture Face *</Label>
-            <FaceScannerWithValidation onCapture={handleCapture} />
+            <FaceScanner onCapture={handleCapture} />
             
             {capturedImage && (
               <div className="mt-4">

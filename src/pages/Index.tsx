@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scan, UserPlus, Loader2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import FaceScannerWithValidation from "@/components/FaceScannerWithValidation";
+import FaceScanner from "@/components/FaceScanner";
 import MemberRegistration from "@/components/MemberRegistration";
 import MemberStatus from "@/components/MemberStatus";
 import { BulkUpload } from "@/components/BulkUpload";
@@ -170,7 +170,7 @@ const Index = () => {
 
           <TabsContent value="scan" className="space-y-8">
             <div className="max-w-2xl mx-auto">
-              <FaceScannerWithValidation onCapture={handleScan} isScanning={isScanning} />
+              <FaceScanner onCapture={handleScan} isScanning={isScanning} />
             </div>
 
             {(recognizedMember || (isScanning === false && recognizedMember === null && matchSimilarity === undefined)) && (
