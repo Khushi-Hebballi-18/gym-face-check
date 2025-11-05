@@ -72,8 +72,14 @@ export const validateImageFile = async (file: File): Promise<ImageValidationResu
 /**
  * Validates face detection results
  * Checks: face presence, single face, and confidence level
+ * Note: This is disabled for video elements as face detection happens during capture
  */
 export const validateFaceDetection = async (imageElement: HTMLImageElement | HTMLVideoElement): Promise<ImageValidationResult> => {
+  // Skip validation for video elements - we'll validate during capture
+  if (imageElement instanceof HTMLVideoElement) {
+    return { isValid: true };
+  }
+
   try {
     const faces = await detectFaces(imageElement);
     

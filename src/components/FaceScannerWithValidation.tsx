@@ -58,25 +58,41 @@ const FaceScannerWithValidation = ({ onCapture, isScanning }: FaceScannerProps) 
     setIsCapturing(true);
 
     try {
-      // Validate face before capturing
-      const validation = await validateFaceDetection(videoRef.current);
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext("2d");
+
+      if (!ctx) {
+        toast.error("Failed to create canvas context");
+        setIsCapturing(false);
+        return;
+      }
+
+      // Draw video frame to canvas
+      ctx.drawImage(videoRef.current, 0, 0);
+      
+      // Create image from canvas for validation
+      const imageData = canvas.toDataURL("image/jpeg");
+      const img = new Image();
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error("Failed to load image"));
+        img.src = imageData;
+      });
+
+      // Validate face detection on the captured image
+      const validation = await validateFaceDetection(img);
       if (!validation.isValid) {
         toast.error(validation.error || "Face validation failed");
         setIsCapturing(false);
         return;
       }
 
-      const canvas = document.createElement("canvas");
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      const ctx = canvas.getContext("2d");
-
-      if (ctx) {
-        ctx.drawImage(videoRef.current, 0, 0);
-        const imageData = canvas.toDataURL("image/jpeg");
-        onCapture(imageData, canvas);
-        stopCamera();
-      }
+      // If validation passed, send the captured data
+      onCapture(imageData, canvas);
+      stopCamera();
     } catch (error) {
       console.error("Error capturing image:", error);
       toast.error("Failed to capture image");
