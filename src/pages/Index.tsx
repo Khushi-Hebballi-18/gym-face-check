@@ -45,17 +45,35 @@ const Index = () => {
       // Extract embedding from captured face
       const capturedEmbedding = await extractFaceEmbedding(canvas);
 
-      // Get all members with their biometric data
-      const { data: members, error } = await supabase
-        .from("members")
+      // Get all members with their biometric data using a direct join
+      const { data: membersData, error } = await supabase
+        .from("member_biometrics")
         .select(`
-          *,
-          member_biometrics (
-            face_embedding
+          face_embedding,
+          member_id,
+          members (
+            id,
+            name,
+            phone,
+            email,
+            membership_start_date,
+            membership_end_date,
+            is_active,
+            created_at,
+            updated_at
           )
         `);
 
       if (error) throw error;
+
+      // Transform the data to have member info at top level
+      const members = membersData?.map(item => {
+        const memberInfo = Array.isArray(item.members) ? item.members[0] : item.members;
+        return {
+          ...memberInfo,
+          face_embedding: item.face_embedding
+        };
+      }).filter(m => m.id) || [];
 
       if (!members || members.length === 0) {
         toast.error("No members found in database");
@@ -69,17 +87,13 @@ const Index = () => {
 
       for (const member of members) {
         // Skip if member has no biometric data
-        const biometrics = Array.isArray(member.member_biometrics) 
-          ? member.member_biometrics 
-          : member.member_biometrics ? [member.member_biometrics] : [];
-        
-        if (biometrics.length === 0) {
+        if (!member.face_embedding) {
           continue;
         }
 
         const similarity = compareFaceEmbeddings(
           capturedEmbedding,
-          biometrics[0].face_embedding
+          member.face_embedding
         );
 
         if (similarity > bestSimilarity) {

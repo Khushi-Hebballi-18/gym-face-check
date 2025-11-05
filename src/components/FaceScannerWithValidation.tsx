@@ -32,6 +32,8 @@ const FaceScannerWithValidation = ({ onCapture, isScanning }: FaceScannerProps) 
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        // Explicitly play the video to ensure it displays
+        await videoRef.current.play();
       }
       setIsActive(true);
       toast.success("Camera started");
