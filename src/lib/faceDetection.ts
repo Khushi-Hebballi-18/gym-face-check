@@ -5,22 +5,22 @@ env.allowLocalModels = false;
 env.useBrowserCache = true;
 
 let faceDetector: any = null;
-let featureExtractor: any = null;
+let faceEmbedder: any = null;
 
 export const initializeFaceDetection = async () => {
   try {
     console.log("Initializing face detection...");
     
-    // Use a lightweight model for face detection
+    // Use object detection to find faces
     faceDetector = await pipeline(
       "object-detection",
       "Xenova/detr-resnet-50"
     );
     
-    // Use feature extraction for face embeddings
-    featureExtractor = await pipeline(
-      "feature-extraction",
-      "Xenova/all-MiniLM-L6-v2"
+    // Use a proper image embedding model (not text!)
+    faceEmbedder = await pipeline(
+      "image-feature-extraction",
+      "Xenova/vit-base-patch16-224"
     );
     
     console.log("Face detection initialized");
@@ -55,8 +55,8 @@ export const detectFaces = async (imageElement: HTMLImageElement | HTMLVideoElem
 };
 
 export const extractFaceEmbedding = async (canvas: HTMLCanvasElement) => {
-  if (!featureExtractor) {
-    throw new Error("Feature extractor not initialized");
+  if (!faceEmbedder) {
+    throw new Error("Face embedder not initialized");
   }
 
   try {
@@ -71,8 +71,8 @@ export const extractFaceEmbedding = async (canvas: HTMLCanvasElement) => {
       img.src = imageData;
     });
 
-    // Extract features
-    const result = await featureExtractor(img, { pooling: "mean", normalize: true });
+    // Extract face features using image embedding model
+    const result = await faceEmbedder(img, { pooling: "mean", normalize: true });
     
     // Convert to array and return as string
     return JSON.stringify(Array.from(result.data));
