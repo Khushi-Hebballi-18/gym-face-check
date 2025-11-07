@@ -69,11 +69,12 @@ const Index = () => {
       // Transform the data to have member info at top level
       const members = membersData?.map(item => {
         const memberInfo = Array.isArray(item.members) ? item.members[0] : item.members;
+        if (!memberInfo) return null;
         return {
           ...memberInfo,
           face_embedding: item.face_embedding
         };
-      }).filter(m => m.id) || [];
+      }).filter(m => m !== null && m.id) || [];
 
       if (!members || members.length === 0) {
         toast.error("No members found in database");
