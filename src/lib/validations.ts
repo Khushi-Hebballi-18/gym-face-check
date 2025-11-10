@@ -10,8 +10,8 @@ export const memberSchema = z.object({
     .trim()
     .optional()
     .transform((val) => val || "")
-    .refine((val) => val === "" || /^\+?[1-9]\d{9,14}$/.test(val), {
-      message: "Invalid phone format (use format: +91 9876543210)"
+    .refine((val) => val === "" || /^\+?[1-9][\d\s]{9,14}$/.test(val), {
+      message: "Invalid phone format (use format: +91 9876543210 or +91 98765 43210)"
     }),
   membershipMonths: z.number()
     .int("Must be a whole number")
