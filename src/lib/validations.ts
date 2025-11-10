@@ -8,8 +8,10 @@ export const memberSchema = z.object({
     .regex(/^[a-zA-Z\s'-]+$/, "Name can only contain letters, spaces, hyphens, and apostrophes"),
   phone: z.string()
     .trim()
+    .optional()
+    .transform((val) => val || "")
     .refine((val) => val === "" || /^\+?[1-9]\d{9,14}$/.test(val), {
-      message: "Invalid phone format"
+      message: "Invalid phone format (use format: +91 9876543210)"
     }),
   membershipMonths: z.number()
     .int("Must be a whole number")
