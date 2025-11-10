@@ -8,9 +8,9 @@ export const memberSchema = z.object({
     .regex(/^[a-zA-Z\s'-]+$/, "Name can only contain letters, spaces, hyphens, and apostrophes"),
   phone: z.string()
     .trim()
-    .regex(/^\+?[1-9]\d{9,14}$/, "Invalid phone format")
-    .optional()
-    .or(z.literal("")),
+    .refine((val) => val === "" || /^\+?[1-9]\d{9,14}$/.test(val), {
+      message: "Invalid phone format"
+    }),
   membershipMonths: z.number()
     .int("Must be a whole number")
     .min(0, "Cannot be negative")

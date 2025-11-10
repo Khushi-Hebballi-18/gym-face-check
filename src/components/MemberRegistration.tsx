@@ -182,11 +182,25 @@ const MemberRegistration = ({ onSuccess }: { onSuccess?: () => void }) => {
             {capturedImage && (
               <div className="mt-4">
                 <p className="text-sm text-accent mb-2">✓ Face captured successfully</p>
-                <img 
-                  src={capturedImage} 
-                  alt="Captured face" 
-                  className="w-32 h-32 object-cover rounded-lg border-2 border-accent"
-                />
+                <div className="flex items-center gap-4">
+                  <img 
+                    src={capturedImage} 
+                    alt="Captured face" 
+                    className="w-32 h-32 object-cover rounded-lg border-2 border-accent"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setCapturedImage(null);
+                      setCapturedCanvas(null);
+                      toast.info("Photo cleared. Please capture a new photo.");
+                    }}
+                    className="h-fit"
+                  >
+                    Retake Photo
+                  </Button>
+                </div>
               </div>
             )}
           </div>
