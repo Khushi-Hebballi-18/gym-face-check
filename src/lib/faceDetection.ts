@@ -17,10 +17,10 @@ export const initializeFaceDetection = async () => {
       "Xenova/detr-resnet-50"
     );
     
-    // Use CLIP model for face embeddings (properly handles images)
+    // Use ResNet for face embeddings - works better with transformers.js
     faceEmbedder = await pipeline(
-      "feature-extraction",
-      "Xenova/clip-vit-base-patch32"
+      "image-feature-extraction",
+      "Xenova/resnet-50"
     );
     
     console.log("Face detection initialized");
@@ -71,8 +71,8 @@ export const extractFaceEmbedding = async (canvas: HTMLCanvasElement) => {
       img.src = imageData;
     });
 
-    // Extract face features using image embedding model
-    const result = await faceEmbedder(img, { pooling: "mean", normalize: true });
+    // Extract face features using ResNet
+    const result = await faceEmbedder(img);
     
     // Convert to array and return as string
     return JSON.stringify(Array.from(result.data));
