@@ -17,9 +17,9 @@ export const initializeFaceDetection = async () => {
       "Xenova/detr-resnet-50"
     );
     
-    // Use a proper image embedding model (not text!)
+    // Use a proper image embedding model for face recognition
     faceEmbedder = await pipeline(
-      "image-feature-extraction",
+      "feature-extraction",
       "Xenova/vit-base-patch16-224"
     );
     
